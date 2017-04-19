@@ -2,7 +2,6 @@
 """
 Run these tests @ Devstack:
     paver test_system -s lms --test_id=lms/djangoapps/progress/tests.py
-
 """
 import uuid
 from mock import MagicMock, patch
@@ -22,10 +21,7 @@ from progress.models import CourseModuleCompletion, StudentProgress, StudentProg
 from courseware.model_data import FieldDataCache
 from courseware import module_render
 from util.signals import course_deleted
-from edx_solutions_api_integration.test_utils import SignalDisconnectTestMixin
-
-from edx_notifications.startup import initialize as initialize_notifications
-from edx_notifications.lib.consumer import get_notifications_count_for_user
+from gradebook.test_utils import SignalDisconnectTestMixin
 
 
 MODULESTORE_CONFIG = mixed_store_config(settings.COMMON_TEST_DATA_ROOT, {})
@@ -33,7 +29,6 @@ MODULESTORE_CONFIG = mixed_store_config(settings.COMMON_TEST_DATA_ROOT, {})
 
 @override_settings(MODULESTORE=MODULESTORE_CONFIG)
 @override_settings(STUDENT_GRADEBOOK=True)
-@patch.dict(settings.FEATURES, {'ENABLE_NOTIFICATIONS': True})
 class CourseModuleCompletionTests(SignalDisconnectTestMixin, ModuleStoreTestCase):
     """ Test suite for CourseModuleCompletion """
 
@@ -55,8 +50,6 @@ class CourseModuleCompletionTests(SignalDisconnectTestMixin, ModuleStoreTestCase
         super(CourseModuleCompletionTests, self).setUp()
         self.user = UserFactory()
         self._create_course()
-
-        initialize_notifications()
 
     def _create_course(self, start=None, end=None):
         """
@@ -178,31 +171,6 @@ class CourseModuleCompletionTests(SignalDisconnectTestMixin, ModuleStoreTestCase
             content_id=self.problem4.location
         )
         self.assertIsNotNone(completion_fetch)
-
-    def test_check_notifications(self):
-        """
-        Save a CourseModuleCompletion and fetch it again
-        """
-        module = self.get_module_for_user(self.user, self.course, self.problem4)
-        module.system.publish(module, 'progress', {})
-
-        completion_fetch = CourseModuleCompletion.objects.get(
-            user=self.user.id,
-            course_id=self.course.id,
-            content_id=self.problem4.location
-        )
-        self.assertIsNotNone(completion_fetch)
-
-        # since we are alone, then we should be listed as first
-        self.assertEqual(get_notifications_count_for_user(self.user.id), 1)
-
-        # progressing on a 2nd item, shouldn't change our positions, because
-        # we're the only one in this course
-        module = self.get_module_for_user(self.user, self.course, self.problem5)
-        module.system.publish(module, 'progress', {})
-
-        # since we are alone, then we should be listed as first
-        self.assertEqual(get_notifications_count_for_user(self.user.id), 1)
 
     @patch.dict(settings.FEATURES, {'ALLOW_STUDENT_STATE_UPDATES_ON_CLOSED_COURSE': False})
     def test_save_completion_with_feature_flag(self):

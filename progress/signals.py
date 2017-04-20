@@ -13,8 +13,7 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locator import BlockUsageLocator
 from util.signals import course_deleted
 
-from course_metadata.utils import is_progress_detached_vertical
-
+from progress.utils import is_progress_detached_vertical
 from progress.models import StudentProgress, StudentProgressHistory, CourseModuleCompletion
 
 from xmodule.modulestore.django import modulestore

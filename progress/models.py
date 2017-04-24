@@ -169,6 +169,12 @@ class CourseModuleCompletion(TimeStampedModel):
         This would skip those modules with ignorable categories
         """
         detached_categories = getattr(settings, 'PROGRESS_DETACHED_CATEGORIES', [])
-        cat_list = [Q(content_id__contains=item.strip()) for item in detached_categories]
-        cat_list = reduce(lambda a, b: a | b, cat_list)
-        return cls.objects.all().exclude(cat_list)
+        if len(detached_categories) > 0:
+            cat_list = [Q(content_id__contains=item.strip()) for item in detached_categories]
+            if len(cat_list) > 0:
+                cat_list = reduce(lambda a, b: a | b, cat_list)
+                return cls.objects.all().exclude(cat_list)
+            else:
+                return cls.objects.all()
+        else:
+            return cls.objects.all()

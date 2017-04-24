@@ -74,8 +74,12 @@ class Command(BaseCommand):
             for user in users:
                 total_users_processed += 1
                 status = 'skipped'
-                completions = CourseModuleCompletion.objects.filter(course_id=course.id, user_id=user.id)\
-                    .exclude(cat_list).values_list('content_id', flat=True).distinct()
+                if len(cat_list) > 0:
+                    completions = CourseModuleCompletion.objects.filter(course_id=course.id, user_id=user.id)\
+                        .exclude(cat_list).values_list('content_id', flat=True).distinct()
+                else:
+                    completions = CourseModuleCompletion.objects.filter(course_id=course.id, user_id=user.id)\
+                        .values_list('content_id', flat=True).distinct()
 
                 num_completions = sum([is_valid_progress_module(content_id=content_id) for content_id in completions])
                 try:

@@ -46,7 +46,8 @@ class Command(BaseCommand):
         total_users_processed = 0
         detached_categories = getattr(settings, 'PROGRESS_DETACHED_CATEGORIES', [])
         cat_list = [Q(content_id__contains=item.strip()) for item in detached_categories]
-        cat_list = reduce(lambda a, b: a | b, cat_list)
+        if len(cat_list) > 0:
+            cat_list = reduce(lambda a, b: a | b, cat_list)
 
         # Get the list of courses from the system
         courses = modulestore().get_courses()

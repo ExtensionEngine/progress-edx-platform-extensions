@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='progress-edx-platform-extensions',
-    version='1.1.6',
+    version='1.1.7',
     description='Progress management extension for edX platform',
     long_description=open('README.rst').read(),
     author='edX',

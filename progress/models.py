@@ -47,6 +47,18 @@ class StudentProgress(models.Model):
         return completions
 
     @classmethod
+    def get_total_completions_for_user(cls, course_key, username):
+        """
+        Returns count of completions for a given course and user.
+        """
+        queryset = cls.objects.filter(course_id__exact=course_key,
+                                      user__username=username,
+                                      user__courseenrollment__is_active=True,
+                                      user__courseenrollment__course_id__exact=course_key)
+        completions = sum([student_progress.completions for student_progress in queryset])
+        return completions
+
+    @classmethod
     def get_num_users_started(cls, course_key, exclude_users=None, org_ids=None, group_ids=None):
         """
         Returns count of users who completed at least one module.
